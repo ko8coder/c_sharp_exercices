@@ -1,0 +1,225 @@
+using CplusToCsharp;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CplusToCsharp
+{
+    enum enGameChoices
+    {
+        ROCK = 1,
+        SCISSORS = 2,
+        PAPER = 3
+    }
+    struct stGameStatistics
+    {
+        public int numberOfRounds ;
+        public int draws ;
+        public int playerWins ;
+        public int computerWins ;
+    };
+    struct stRoundChoices
+    {
+       public enGameChoices playerChoice;
+       public enGameChoices computerChoice;
+    };
+    
+    internal class Program
+    {
+        private static Random rand = new Random();
+        static int RandomNumber(int from, int to)
+        {
+            return rand.Next(from, to + 1);
+        }
+       static int ReadPositiveNumber(string Message)
+        {
+            int Number = 0;
+            do
+            {
+                Console.WriteLine(Message);
+                
+            } while (!int.TryParse(Console.ReadLine(), out Number) || Number <1);
+            return Number;
+        }
+
+       static int HowManyRounds()
+        {
+            return ReadPositiveNumber("Enter the number of rounds? ");
+        }
+        static  void InputPlayerChoice(ref stRoundChoices roundChoices)
+        {
+            int choice;
+            do
+            {
+                choice = ReadPositiveNumber("Your Choice : [1] : Rock, [2] : Scissors, [3] : Paper ? ");
+            } while (choice < 1 || choice > 3);
+
+            roundChoices.playerChoice = (enGameChoices) choice;
+        }
+       static void RandomComputerChoice(ref stRoundChoices roundChoices)
+        {
+            int choice = RandomNumber(1, 3);
+
+            roundChoices.computerChoice = (enGameChoices)choice;
+        }
+        static string DisplayChoice(enGameChoices choice)
+        {
+            switch (choice)
+            {
+                case enGameChoices.ROCK: return "Rock";
+                case enGameChoices.SCISSORS: return "Scissors";
+                case enGameChoices.PAPER: return "Paper";
+                default: return "Error";
+            }
+        }
+        static string CheckWinnerRound(ref stGameStatistics gameStats , stRoundChoices roundChoices)
+        {
+            if(roundChoices.playerChoice==roundChoices.computerChoice)
+               {
+                gameStats.draws++;
+                return "No Winner";
+               }
+            else if (roundChoices.playerChoice == enGameChoices.ROCK)
+            {
+                if (roundChoices.computerChoice == enGameChoices.SCISSORS)
+                {
+                    gameStats.playerWins++;
+                    Console.Beep();
+                    Console.BackgroundColor=ConsoleColor.Yellow;
+                    return "Player";
+                }
+
+                else
+                {
+                    // computer chooses paper so wins agains rock
+                    gameStats.computerWins++;
+                    Console.Beep();
+                    Console.BackgroundColor=ConsoleColor.Red;
+                    return "Computer";
+                }
+
+            }      
+
+	else if (roundChoices.playerChoice == enGameChoices.PAPER)
+	{
+		if (roundChoices.computerChoice == enGameChoices.ROCK)
+		{
+			gameStats.playerWins++;
+                    Console.Beep();
+                    Console.BackgroundColor = ConsoleColor.Yellow;
+                    return "Player";
+		}
+
+		else {
+			// computer chooses scissors so wins agains paper
+			gameStats.computerWins++;
+                    Console.Beep();
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    return "Computer";
+		}
+	}
+
+    else if (roundChoices.playerChoice == enGameChoices.SCISSORS)
+{
+    if (roundChoices.computerChoice == enGameChoices.PAPER)
+    {
+        gameStats.playerWins++;
+                    Console.Beep();
+                    Console.BackgroundColor = ConsoleColor.Blue;
+                    return "Player";
+    }
+
+    else
+    {
+        // computer chooses scissors so wins agains paper
+        gameStats.computerWins++;
+                    Console.Beep();
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    return "Computer";
+    }
+}
+return "Error";
+}
+        static string DecideGameWinner(stGameStatistics gameStats)
+        {
+            if (gameStats.playerWins == gameStats.computerWins)
+                return "No Winner";
+
+            else if (gameStats.playerWins > gameStats.computerWins)
+                return "Player";
+
+            else
+                return "Computer";
+        }
+        static void GameOver(stGameStatistics gameStats)
+        {
+            Console.WriteLine("\t\t----------------------------------------");
+            Console.WriteLine("\t\t\t\t\t  +++ GAME OVER +++");
+            Console.WriteLine("\t\t----------[Game Results]----------------");
+            Console.WriteLine("\t\tGame Rounds : " + gameStats.numberOfRounds);
+
+            Console.WriteLine("\t\tPlayer won round : " + gameStats.playerWins);
+            Console.WriteLine("\t\tComputer won round : " + gameStats.computerWins);
+            Console.WriteLine("\t\tDraw times : " + gameStats.draws);
+
+            Console.WriteLine("\t\tFinale Winner : "+ DecideGameWinner(gameStats));
+            Console.WriteLine(" ");
+        }
+        static void Main(string[] args)
+        {
+
+            bool flag = true;
+            while (flag)
+            {
+                stGameStatistics gameStats = new stGameStatistics();
+                stRoundChoices roundChoices = new stRoundChoices();
+
+                gameStats.numberOfRounds = HowManyRounds();
+
+                for (int i = 1; i <= gameStats.numberOfRounds; i++)
+                {
+                    Console.WriteLine("Round " + i + " begins:");
+                    InputPlayerChoice(ref roundChoices);
+                    RandomComputerChoice(ref roundChoices);
+
+                    Console.WriteLine("Player Choice   : " + DisplayChoice(roundChoices.playerChoice));
+                    Console.WriteLine("Computer Choice : " + DisplayChoice(roundChoices.computerChoice));
+                    Console.WriteLine("Round Winner : " + CheckWinnerRound(ref gameStats, roundChoices));
+
+                    Console.ResetColor();
+
+                }
+                GameOver(gameStats);
+
+                bool validAnswer = false;
+                do
+                {
+                    Console.Write("Do you want to play again? (Y/N) : ");
+                    string restartGame = Console.ReadLine();
+
+                    if (!string.IsNullOrWhiteSpace(restartGame))
+                    {
+                        string input = restartGame.Trim().ToUpper();
+                        if (input == "N")
+                        {
+                            flag = false;
+                            validAnswer = true;
+                        }
+                        else if (input == "Y")
+                        {
+                            flag = true;
+                            validAnswer = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid input. Please enter Y or N.");
+                        }
+                    }
+                } while (!validAnswer);
+
+            }
+        }
+    }
+}
